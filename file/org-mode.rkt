@@ -36,16 +36,18 @@
       [in-props?
        (match 
         l
+        [(regexp #rx"^:END:" (list _))
+         (values content/rev
+                 props
+                 #f)]
         [(regexp #rx"^:([^:]+):[ \t]+(.*)$" (list _ key (app trim-spaces val)))
          (values content/rev
                  (if (string=? "" val)
-                     props
-                     (hash-set props key val))
+                   props
+                   (hash-set props key val))
                  #t)]
-        [":END:"
-         (values content/rev
-                 props
-                 #f)])]
+        [x
+         (error 'extract-properties "Got ~v\n" l)])]
       [(string=? ":PROPERTIES:" l)
        (values content/rev
                props
