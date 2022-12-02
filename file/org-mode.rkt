@@ -24,7 +24,7 @@
     (list* (regexp-replace #rx"^[ \t]+" (read-line) "")
            (read-content))]))
 
-(define (extract-properties ls)
+(define (extract-properties line ls)
   (define-values 
     (content/rev props in-props?)
     (for/fold
@@ -47,7 +47,7 @@
                    (hash-set props key val))
                  #t)]
         [x
-         (error 'extract-properties "Got ~v\n" l)])]
+         (error 'extract-properties "Got ~v at line ~a\n" l line)])]
       [(string=? ":PROPERTIES:" l)
        (values content/rev
                props
@@ -67,8 +67,10 @@
    [(equal? (stars i)
             (peek-string (add1 i) 0))
     (define s (read-line))
+    (define-values (line col pos) 
+      (port-next-location (current-input-port)))
     (define-values (props content)
-      (extract-properties (read-content)))
+      (extract-properties line (read-content)))
     (list*
      (node (strip-stars s)
            props
